@@ -45,7 +45,7 @@ function readCharacteristics () {
 
 function readReviews (photos, characteristics) {
   return new Promise((resolve, reject) => {
-    var data = [];
+    const data = [];
     fs.createReadStream("./reviews.csv")
       .pipe(csv.parse({ headers: true }))
       .on("error", (error) => console.error(error))
@@ -64,12 +64,9 @@ function readReviews (photos, characteristics) {
 }
 
 async function awaitReviews () {
-  console.log('start')
-  let photos = await readPhotos();
-  let characteristics = await readCharacteristics();
-  let reviews = await readReviews(photos, characteristics);
-  console.log(reviews)
-  console.log('done')
+  let photos = await readPhotos ();
+  let characteristics = await readCharacteristics ();
+  let reviews = await readReviews (photos, characteristics);
   return reviews;
 }
 
