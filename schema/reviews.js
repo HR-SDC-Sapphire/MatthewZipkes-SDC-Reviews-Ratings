@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
-const fs = require('fs');
-const csv = require('@fast-csv/parse');
+
 // const { awaitReviews } = require("../review-parse.js");
 
 //Schema for products to show on mongosh
@@ -35,3 +34,5 @@ const reviewSchema = new mongoose.Schema({
 });
 
 const Review = mongoose.model("Reviews", reviewSchema, "reviews");
+
+module.exports = { Review };

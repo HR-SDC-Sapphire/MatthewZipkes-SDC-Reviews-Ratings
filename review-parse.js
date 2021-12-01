@@ -2,7 +2,7 @@ const fs = require('fs');
 const csv = require('@fast-csv/parse');
 const { Review } = require("./schema/reviews");
 
-let batchSize = 100;
+let batchSize = 101;
 let currentPhotosCounter = 0;
 let currentCharacteristicsCounter = 0;
 let currentReviewsCounter = 0;
@@ -16,14 +16,12 @@ function readPhotos (toSkip) {
     .on("data", (row) => {
       let rowId = parseInt(row.id);
       let review_id = parseInt(row.review_id);
-      console.log(row)
       if (!data[review_id]) {
         data[review_id] = [row];
       } else {
         data[review_id].push(row);
       }
-
-      if (review_id === batchSize + 1) {
+      if (review_id  > batchSize - 1) {
         currentPhotosCounter = rowId;
         readCharacteristics(data, currentCharacteristicsCounter)
         data = {};
@@ -46,17 +44,16 @@ function readCharacteristics (photosData, toSkip) {
       let review_id = parseInt(row.review_id);
       let characteristic_id = parseInt(row.characteristic_id);
       let value = parseInt(row.value);
-      console.log(data)
+      // console.log(data)
       if (!data[review_id]) {
         data[review_id] = [row];
       } else {
         data[review_id].push(row);
       }
-      if (review_id === batchSize + 1) {
+      if (review_id > batchSize - 1) {
         currentCharacteristicsCounter = rowId;
         readReviews(photosData, data, currentReviewsCounter)
         data = {};
-
         readStream.destroy()
       }
     })
@@ -67,7 +64,7 @@ function readCharacteristics (photosData, toSkip) {
 
 function readReviews (photosData, characteristicsData, toSkip) {
   toSkip = toSkip ? toSkip : 0
-  const data = [];
+  let data = [];
   const readStream = fs.createReadStream("./reviews.csv")
     .pipe(csv.parse({ headers: true, skipRows: toSkip }))
     .on("error", (error) => console.error(error))
@@ -78,22 +75,32 @@ function readReviews (photosData, characteristicsData, toSkip) {
       row.helpfulness = parseInt(row.helpfulness);
       row.photos = photosData[row.id];
       row.characteristics = characteristicsData[row.id];
-      console.log(row);
       data.push(row);
       if (row.id === batchSize) {
+        currentReviewsCounter = row.id
         console.log(data)
         Review.insertMany(data)
-        batchSize += 100;
-
-        data = [];
-        readPhotos(currentPhotosCounter)
-        readStream.destroy();
-      } else {
+        .then(res => {
+          batchSize += 100;
+          data = [];
+          readPhotos(currentPhotosCounter);
+          readStream.destroy();
+        })
+        .catch(err => {
+          console.log(err);
+        });
+      } else if (row.id === 5777922 || row.id > 5777922) {
+        Review.insertMany(data)
+        .then(res => {
         console.log('done');
         readStream.destroy();
+        })
+        .catch( err => {
+          console.log(err)
+        })
       }
     })
-    .on("end", (rowCount) => console.log(rowCount));
+    .on("end", (rowCount) => console.log('this is the end', rowCount));
 }
 
 module.exports = { readPhotos }
