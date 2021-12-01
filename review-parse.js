@@ -44,7 +44,6 @@ function readCharacteristics (photosData, toSkip) {
       let review_id = parseInt(row.review_id);
       let characteristic_id = parseInt(row.characteristic_id);
       let value = parseInt(row.value);
-      // console.log(data)
       if (!data[review_id]) {
         data[review_id] = [row];
       } else {
@@ -78,7 +77,6 @@ function readReviews (photosData, characteristicsData, toSkip) {
       data.push(row);
       if (row.id === batchSize) {
         currentReviewsCounter = row.id
-        console.log(data)
         Review.insertMany(data)
         .then(res => {
           batchSize += 100;
