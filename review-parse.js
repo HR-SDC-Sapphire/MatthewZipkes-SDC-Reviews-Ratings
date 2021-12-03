@@ -2,7 +2,7 @@ const fs = require('fs');
 const csv = require('@fast-csv/parse');
 const { Review } = require("./schema/reviews");
 
-let batchSize = 101;
+let batchSize = 100;
 let currentPhotosCounter = 0;
 let currentCharacteristicsCounter = 0;
 let currentReviewsCounter = 0;
@@ -10,7 +10,7 @@ let currentReviewsCounter = 0;
 function readPhotos (toSkip) {
   toSkip = toSkip ? toSkip : 0
   let data = {};
-  const readStream = fs.createReadStream("./photos.csv")
+  const readStream = fs.createReadStream("./reviews_photos.csv")
     .pipe(csv.parse({ headers: true, skipRows: toSkip }))
     .on("error", (error) => console.error(error))
     .on("data", (row) => {
@@ -21,7 +21,7 @@ function readPhotos (toSkip) {
       } else {
         data[review_id].push(row);
       }
-      if (review_id  > batchSize - 1) {
+      if (review_id  > batchSize) {
         currentPhotosCounter = rowId;
         readCharacteristics(data, currentCharacteristicsCounter)
         data = {};
@@ -36,7 +36,7 @@ function readPhotos (toSkip) {
 function readCharacteristics (photosData, toSkip) {
   toSkip = toSkip ? toSkip : 0
   let data = {};
-  const readStream = fs.createReadStream("./charact.csv")
+  const readStream = fs.createReadStream("./characteristic_reviews.csv")
     .pipe(csv.parse({ headers: true, skipRows: toSkip }))
     .on("error", (error) => console.error(error))
     .on("data", (row) => {
@@ -49,7 +49,7 @@ function readCharacteristics (photosData, toSkip) {
       } else {
         data[review_id].push(row);
       }
-      if (review_id > batchSize - 1) {
+      if (review_id > batchSize) {
         currentCharacteristicsCounter = rowId;
         readReviews(photosData, data, currentReviewsCounter)
         data = {};
@@ -77,6 +77,7 @@ function readReviews (photosData, characteristicsData, toSkip) {
       data.push(row);
       if (row.id === batchSize) {
         currentReviewsCounter = row.id
+        console.log(data)
         Review.insertMany(data)
         .then(res => {
           batchSize += 100;
