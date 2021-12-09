@@ -23,7 +23,7 @@ const reviewSchema = new mongoose.Schema({
       url: String
     },
   ],
-  characteristics: [
+  reviewCharacteristics: [
     {
       id: Number,
     characteristic_id: Number,

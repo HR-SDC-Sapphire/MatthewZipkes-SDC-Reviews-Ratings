@@ -8,7 +8,7 @@ const { readCharacteristics } = require('../characteristics-parser');
 
 app.use(express.json())
 
-mongoose.connect('mongodb://127.0.0.1:27017/reviews')
+mongoose.connect('mongodb://127.0.0.1:27017/RatingAndReviews')
 const db = mongoose.connection
 db.on('error', (error) => console.error(error))
 db.once('open', () => console.log('Connected to DB!'))
@@ -34,13 +34,15 @@ app.get('/reviews/', (req, res) => {
       res.send(err)
     })
 })
-app.post('/reviews', (req, res) => {
-  console.log(req.body)
-      res.status(200).send()
-})
 
 app.get('/reviews/meta', (req, res) => {
   let productId = req.query.product_id;
+  let sizeArray = [];
+  let widthArray = [];
+  let comfortArray = [];
+  let qualityArray = [];
+  let lengthArray = [];
+  let fitArray = [];
 
   Review.find({product_id: productId})
   .then(result => {
@@ -65,7 +67,58 @@ app.get('/reviews/meta', (req, res) => {
       characteristicsResult.forEach( characteristic => {
         metaObject.characteristics[characteristic.name] = {id : characteristic.id, value: 0};
       })
-      console.log(metaObject)
+
+      result.forEach(review => {
+        for (let key in metaObject.characteristics) {
+          review.reviewCharacteristics.forEach(reviewCharacteristic => {
+            if (key === 'Fit') {
+              if (reviewCharacteristic.characteristic_id === metaObject.characteristics[key].id) {
+                fitArray.push(reviewCharacteristic.value)
+              }
+            } else if (key === 'Length') {
+              if (reviewCharacteristic.characteristic_id === metaObject.characteristics[key].id) {
+                lengthArray.push(reviewCharacteristic.value)
+              }
+            } else if (key === 'Comfort') {
+              if (reviewCharacteristic.characteristic_id === metaObject.characteristics[key].id) {
+                comfortArray.push(reviewCharacteristic.value)
+              }
+            } else if (key === 'Quality') {
+              if (reviewCharacteristic.characteristic_id === metaObject.characteristics[key].id) {
+                qualityArray.push(reviewCharacteristic.value)
+              }
+            } else if (key === 'Width') {
+              if (reviewCharacteristic.characteristic_id === metaObject.characteristics[key].id) {
+                widthArray.push(reviewCharacteristic.value)
+              }
+            } else {
+              if (reviewCharacteristic.characteristic_id === metaObject.characteristics[key].id) {
+                sizeArray.push(reviewCharacteristic.value)
+              }
+            }
+          })
+        }
+      })
+      for (let key in metaObject.characteristics) {
+        // console.log(key)
+        if (key === 'Fit') {
+          metaObject.characteristics[key].value = fitArray.reduce((a, b) => a + b) / fitArray.length;
+        } else if (key === 'Length') {
+          metaObject.characteristics[key].value = lengthArray.reduce((a, b) => a + b) / lengthArray.length;
+        } else if (key === 'Comfort') {
+          metaObject.characteristics[key].value = comfortArray.reduce((a, b) => a + b) / comfortArray.length;
+        } else if (key === 'Quality') {
+          metaObject.characteristics[key].value = qualityArray.reduce((a, b) => a + b) / qualityArray.length;
+        } else if (key === 'Width') {
+          metaObject.characteristics[key].value = widthArray.reduce((a, b) => a + b) / widthArray.length;
+        } else {
+          metaObject.characteristics[key].value = sizeArray.reduce((a, b) => a + b) / sizeArray.length;
+      }
+      }
+      res.status(200).send(metaObject)
+    })
+    .catch(err => {
+      res.status(404).send(err)
     })
   })
 })
@@ -80,6 +133,8 @@ app.get('/characteristics', (req, res) => {
     res.status(400).send(err)
   })
 })
+
+
 
 
 
