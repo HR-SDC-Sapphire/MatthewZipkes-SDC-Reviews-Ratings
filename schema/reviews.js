@@ -13,7 +13,7 @@ const reviewSchema = new mongoose.Schema({
   recommend: Boolean,
   reported: Boolean,
   reviewer_name: String,
-  reviewer_name: String,
+  reviewer_email: String,
   response: String,
   helpfulness: Number,
   photos: [

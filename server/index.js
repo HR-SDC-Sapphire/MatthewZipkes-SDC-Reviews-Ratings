@@ -19,13 +19,25 @@ app.get('/reviews/', (req, res) => {
   let sort = req.query.sort || 'relevant';
   let productId = req.query.product_id;
 
-    Review.find({product_id: productId}).sort([['id', 'ascending']])
+  if (sort === 'newest') {
+    Review.find({product_id: productId}).sort({date: -1})
+      .then(result => {
+        if ( page * count >= result.length) {
+          res.status(200).send(result.slice(page * count - count, result.length))
+        } else {
+          res.status(200).send(result.slice(page * count - count, page * count))
+        }
+      })
+      .catch(err => {
+        res.status(400)
+        res.send(err)
+      })
+  } else if (sort === 'helpfulness') {
+    Review.find({product_id: productId}).sort([['helpfulness', 'descending']])
     .then(result => {
       if ( page * count >= result.length) {
-        console.log(result.slice(page * count - count, result.length))
         res.status(200).send(result.slice(page * count - count, result.length))
       } else {
-        console.log(result.slice(page * count - count, page * count))
         res.status(200).send(result.slice(page * count - count, page * count))
       }
     })
@@ -33,6 +45,20 @@ app.get('/reviews/', (req, res) => {
       res.status(400)
       res.send(err)
     })
+  } else {
+    Review.find({product_id: productId}).sort([['id', 'ascending']])
+    .then(result => {
+      if ( page * count >= result.length) {
+        res.status(200).send(result.slice(page * count - count, result.length))
+      } else {
+        res.status(200).send(result.slice(page * count - count, page * count))
+      }
+    })
+    .catch(err => {
+      res.status(400)
+      res.send(err)
+    })
+  }
 })
 
 app.get('/reviews/meta', (req, res) => {
@@ -100,7 +126,6 @@ app.get('/reviews/meta', (req, res) => {
         }
       })
       for (let key in metaObject.characteristics) {
-        // console.log(key)
         if (key === 'Fit') {
           metaObject.characteristics[key].value = fitArray.reduce((a, b) => a + b) / fitArray.length;
         } else if (key === 'Length') {
@@ -123,6 +148,45 @@ app.get('/reviews/meta', (req, res) => {
   })
 })
 
+app.post('/reviews', (req, res) => {
+  Review.find().sort([['id', 'descending']]).limit(1)
+  .then(latestDoc => {
+    let id = latestDoc[0].id + 1
+    const newReview = new Review({
+      id: id,
+      product_id: req.body.product_id,
+      rating: parseInt(req.body.rating),
+      date: new Date(),
+      summary: req.body.summary,
+      body: req.body.body,
+      recommend: req.body.recommend,
+      reported: false,
+      reviewer_name: req.body.name,
+      reviewer_email: req.body.email,
+      response: '',
+      helpfulness: 0,
+      photos: [],
+      reviewCharacteristics: []
+
+    })
+      req.body.photos.forEach(photo => {
+        newReview.photos.push({review_id: id, url: photo})
+      })
+
+      for(let key in req.body.characteristics) {
+        newReview.reviewCharacteristics.push({characteristic_id: key, review_id: id, value: req.body.characteristics[key]})
+      }
+
+      newReview.save()
+      .then(()=> {
+        res.status(201).send()
+      })
+      .catch(err => {
+        res.status(400).send(err)
+      })
+  })
+})
+
 app.get('/characteristics', (req, res) => {
   let productId = req.query.product_id;
   Characteristics.find({product_id: productId})
@@ -134,7 +198,16 @@ app.get('/characteristics', (req, res) => {
   })
 })
 
-
+app.put('/reviews/:review_id/helpful', (req, res) => {
+  Review.find({review_id: req.params.review_id})
+  .then((result) =>{
+    console.log(result)
+    // res.status(200).send()
+  })
+  .catch(err => {
+    // res.status(204).send(err)
+  })
+})
 
 
 
