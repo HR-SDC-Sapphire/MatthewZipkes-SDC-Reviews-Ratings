@@ -1,12 +1,14 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const app = express()
+const cors = require('cors')
 const { readPhotos } = require('../review-parse');
 const { Review } = require('../schema/reviews');
 const { Characteristics } = require('../schema/characteristics');
 const { readCharacteristics } = require('../characteristics-parser');
 
 app.use(express.json())
+app.use(cors())
 
 mongoose.connect('mongodb://127.0.0.1:27017/RatingAndReviews')
 const db = mongoose.connection
@@ -23,9 +25,9 @@ app.get('/reviews/', (req, res) => {
     Review.find({product_id: productId}).sort({date: -1})
       .then(result => {
         if ( page * count >= result.length) {
-          res.status(200).send(result.slice(page * count - count, result.length))
+          res.status(200).send(result.slice(page * count - count, result.length).filter(review => review.reported === false))
         } else {
-          res.status(200).send(result.slice(page * count - count, page * count))
+          res.status(200).send(result.slice(page * count - count, page * count).filter(review => review.reported === false))
         }
       })
       .catch(err => {
@@ -36,9 +38,9 @@ app.get('/reviews/', (req, res) => {
     Review.find({product_id: productId}).sort([['helpfulness', 'descending']])
     .then(result => {
       if ( page * count >= result.length) {
-        res.status(200).send(result.slice(page * count - count, result.length))
+        res.status(200).send(result.slice(page * count - count, result.length).filter(review => review.reported === false))
       } else {
-        res.status(200).send(result.slice(page * count - count, page * count))
+        res.status(200).send(result.slice(page * count - count, page * count).filter(review => review.reported === false))
       }
     })
     .catch(err => {
@@ -49,9 +51,9 @@ app.get('/reviews/', (req, res) => {
     Review.find({product_id: productId}).sort([['id', 'ascending']])
     .then(result => {
       if ( page * count >= result.length) {
-        res.status(200).send(result.slice(page * count - count, result.length))
+        res.status(200).send(result.slice(page * count - count, result.length).filter(review => review.reported === false))
       } else {
-        res.status(200).send(result.slice(page * count - count, page * count))
+        res.status(200).send(result.slice(page * count - count, page * count).filter(review => review.reported === false))
       }
     })
     .catch(err => {
@@ -199,16 +201,23 @@ app.get('/characteristics', (req, res) => {
 })
 
 app.put('/reviews/:review_id/helpful', (req, res) => {
-  Review.find({review_id: req.params.review_id})
-  .then((result) =>{
-    console.log(result)
-    // res.status(200).send()
+  Review.findOneAndUpdate({id: req.params.review_id}, {$inc:{helpfulness: 1}}, {new: true})
+  .then(updatedResult => {
+    res.status(200).send()
   })
   .catch(err => {
-    // res.status(204).send(err)
+    res.status(204).send()
   })
 })
 
-
+app.put('/reviews/:review_id/report', (req, res) => {
+  Review.findOneAndUpdate({id: req.params.review_id}, {$set:{reported: true}}, {new: true})
+  .then(updatedResult => {
+    res.status(200).send()
+  })
+  .catch(err => {
+    res.status(204).send()
+  })
+})
 
 app.listen(3000, () => console.log('Listening on port 3000'))
