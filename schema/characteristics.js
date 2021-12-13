@@ -5,3 +5,7 @@ const characteristicsSchema = new mongoose.Schema({
   product_id: Number,
   name: String
 })
+
+const Characteristics = mongoose.model("Characteristics", characteristicsSchema, "characteristics");
+
+module.exports = { Characteristics };
