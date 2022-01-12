@@ -440,7 +440,7 @@ Response Status: `204 NO CONTENT`
 - [Img Shields](https://shields.io)
 - [AWS EC2](https://aws.amazon.com/ec2/?ec2-whats-new.sort-by=item.additionalFields.postDateTime&ec2-whats-new.sort-order=desc)
 
-[cory-linkedin]: https://www.linkedin.com/in/coryellerbroek/
-[cory-github]: https://github.com/LrBrK33
+[Matthew-linkedin]: https://www.linkedin.com/in/matthewzipkes/
+[Matthew-github]: https://github.com/MatthewZipkes
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-grey?style=for-the-badge&logo=linkedin
 [github-shield]: https://img.shields.io/badge/-GitHub-grey?style=for-the-badge&logo=github
