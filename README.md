@@ -30,9 +30,10 @@
 
 # Contributor
 
-### Cory Ellerbroek - cory.ellerbroek@gmail.com
+### Matthew Zipkes - matthewzipkes@gmail.com
 
-<img src="![MatthewZipkes](https://user-images.githubusercontent.com/81441621/149183705-ce9c48bf-0eb5-4e00-aae8-3b7f99dc9756.jpg)" alt="MatthewZipkes" height="150"><br>
+<img src="![MatthewZipkes](https://user-images.githubusercontent.com/81441621/149183705-ce9c48bf-0eb5-4e00-aae8-3b7f99dc9756.jpg)" alt="MatthewZipkes" height="150">
+<br>
 
 [![linkedin-shield]][cory-linkedin]
 
